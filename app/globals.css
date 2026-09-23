@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
+/* CJ OS palette: neutral, high-contrast, three status colors and nothing else. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-muted: #f4f4f5;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --foreground: #18181b;
+  --muted: #71717a;
+  --accent: #18181b;
+  --accent-foreground: #fafafa;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --pending: #b45309;
+  --pending-surface: #fffbeb;
+  --completed: #15803d;
+  --completed-surface: #f0fdf4;
+  --blocked: #b91c1c;
+  --blocked-surface: #fef2f2;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #09090b;
+    --surface: #101012;
+    --surface-muted: #18181b;
+    --border: #27272a;
+    --border-strong: #3f3f46;
+    --foreground: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #fafafa;
+    --accent-foreground: #09090b;
+
+    --pending: #fbbf24;
+    --pending-surface: #211a06;
+    --completed: #4ade80;
+    --completed-surface: #06210f;
+    --blocked: #f87171;
+    --blocked-surface: #260d0d;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-pending: var(--pending);
+  --color-pending-surface: var(--pending-surface);
+  --color-completed: var(--completed);
+  --color-completed-surface: var(--completed-surface);
+  --color-blocked: var(--blocked);
+  --color-blocked-surface: var(--blocked-surface);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Native dialog backdrop — used by every modal in the app. */
+dialog::backdrop {
+  background: rgb(9 9 11 / 0.6);
 }
