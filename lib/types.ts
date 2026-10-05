@@ -13,8 +13,71 @@ export function isCommitmentStatus(value: unknown): value is CommitmentStatus {
 export type UserProfile = {
   uid: string;
   displayName: string;
-  department: string;
+  /**
+   * Id of a `departments` document. Stored in Firestore as `department`;
+   * empty when the person is unassigned.
+   */
+  departmentId: string;
   weeklyCapacity: number;
+  /** Job title, e.g. "Product Engineer". */
+  role: string;
+  /** Functional tags, e.g. "frontend", "sales". */
+  tags: string[];
+  /** What this person is the go-to owner for. */
+  areasOfOwnership: string[];
+};
+
+/** A document in the `departments` collection. */
+export type Department = {
+  id: string;
+  name: string;
+  /** uid of the department lead — maps to `users`. */
+  leadId: string;
+  objectives: string[];
+  kpis: string[];
+};
+
+/** Pipeline stages, in the order a project moves through them. */
+export const PROJECT_STAGES = [
+  "Idea",
+  "Research",
+  "Validation",
+  "MVP",
+  "Pilot",
+] as const;
+
+export type ProjectStage = (typeof PROJECT_STAGES)[number];
+
+export function isProjectStage(value: unknown): value is ProjectStage {
+  return PROJECT_STAGES.includes(value as ProjectStage);
+}
+
+export const PROJECT_STATUSES = [
+  "On Track",
+  "At Risk",
+  "Blocked",
+  "Complete",
+] as const;
+
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
+export function isProjectStatus(value: unknown): value is ProjectStatus {
+  return PROJECT_STATUSES.includes(value as ProjectStatus);
+}
+
+/** A document in the `projects` collection. */
+export type Project = {
+  id: string;
+  name: string;
+  /** uid of the project owner — maps to `users`. */
+  ownerId: string;
+  departmentId: string;
+  objective: string;
+  stage: ProjectStage;
+  status: ProjectStatus;
+  evidenceLinks: string[];
+  totalTasks: number;
+  completedTasks: number;
 };
 
 /**
@@ -33,6 +96,8 @@ export type Commitment = {
   status: CommitmentStatus;
   blockerReason: string | null;
   evidenceLink: string | null;
+  /** The project this commitment advances, or `null` for standalone work. */
+  projectId: string | null;
   deadline: Timestamp | null;
   createdAt: Timestamp | null;
 };

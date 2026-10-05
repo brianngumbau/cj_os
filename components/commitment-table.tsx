@@ -3,13 +3,15 @@
 import { format } from "date-fns";
 import {
   ExternalLink,
+  FolderKanban,
   LoaderCircle,
   RotateCcw,
   TriangleAlert,
 } from "lucide-react";
 
 import { displayNameFor } from "@/lib/auth-context";
-import type { Commitment, UserProfile } from "@/lib/types";
+import { departmentLabel, useDepartments } from "@/lib/departments";
+import type { Commitment, Project, UserProfile } from "@/lib/types";
 import { StatusBadge } from "./status-badge";
 
 /** Short, human label for an evidence URL. Falls back to the raw string. */
@@ -30,6 +32,7 @@ const actionButtonClass =
 type CommitmentTableProps = {
   commitments: Commitment[];
   directory: Map<string, UserProfile>;
+  projects: Map<string, Project>;
   currentUserId: string;
   currentUserEmail: string | null;
   busyId: string | null;
@@ -41,6 +44,7 @@ type CommitmentTableProps = {
 export function CommitmentTable({
   commitments,
   directory,
+  projects,
   currentUserId,
   currentUserEmail,
   busyId,
@@ -48,6 +52,7 @@ export function CommitmentTable({
   onRequestBlocker,
   onReopen,
 }: CommitmentTableProps) {
+  const { departments } = useDepartments();
   const now = Date.now();
 
   return (
@@ -86,6 +91,9 @@ export function CommitmentTable({
               deadlineDate.getTime() < now &&
               commitment.status !== "completed";
             const isBusy = busyId === commitment.id;
+            const project = commitment.projectId
+              ? projects.get(commitment.projectId)
+              : undefined;
 
             return (
               <tr
@@ -93,6 +101,14 @@ export function CommitmentTable({
                 className="border-b border-border last:border-b-0 align-top"
               >
                 <td className="px-4 py-3">
+                  {commitment.projectId ? (
+                    <p className="mb-1">
+                      <span className="inline-flex max-w-full items-center gap-1 truncate rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
+                        <FolderKanban className="size-3 shrink-0" aria-hidden />
+                        {project?.name || "Unknown project"}
+                      </span>
+                    </p>
+                  ) : null}
                   <p className="font-medium leading-snug">
                     {commitment.objective}
                   </p>
@@ -121,9 +137,9 @@ export function CommitmentTable({
                       <span className="ml-1.5 text-[11px] text-muted">(you)</span>
                     ) : null}
                   </p>
-                  {owner?.department ? (
+                  {owner?.departmentId ? (
                     <p className="mt-0.5 text-xs text-muted">
-                      {owner.department}
+                      {departmentLabel(departments, owner.departmentId)}
                     </p>
                   ) : null}
                 </td>

@@ -6,7 +6,8 @@ import type { FirestoreError } from "firebase/firestore";
 
 import { useAuth } from "@/lib/auth-context";
 import { reopenCommitment, subscribeToCommitments } from "@/lib/commitments";
-import type { Commitment, UserProfile } from "@/lib/types";
+import { subscribeToProjects } from "@/lib/projects";
+import type { Commitment, Project, UserProfile } from "@/lib/types";
 import { subscribeToDirectory } from "@/lib/users";
 import { BlockerDialog } from "./blocker-dialog";
 import { CommitmentTable } from "./commitment-table";
@@ -43,6 +44,9 @@ export function Ledger() {
   const [directory, setDirectory] = useState<Map<string, UserProfile>>(
     () => new Map(),
   );
+  const [projects, setProjects] = useState<Map<string, Project>>(
+    () => new Map(),
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [scope, setScope] = useState<Scope>("all");
@@ -64,6 +68,21 @@ export function Ledger() {
     // still renders and just falls back to account emails and short ids.
     return subscribeToDirectory(setDirectory, () => setDirectory(new Map()));
   }, []);
+
+  useEffect(() => {
+    // Project names label linked commitments. Like the directory, an
+    // unreadable projects collection degrades to unlabelled rows.
+    return subscribeToProjects(
+      (next) => setProjects(new Map(next.map((project) => [project.id, project]))),
+      () => setProjects(new Map()),
+    );
+  }, []);
+
+  /** Projects a new commitment can be linked to: anything not yet complete. */
+  const activeProjects = useMemo(
+    () => [...projects.values()].filter((project) => project.status !== "Complete"),
+    [projects],
+  );
 
   const visible = useMemo(() => {
     if (!commitments) return [];
@@ -163,6 +182,7 @@ export function Ledger() {
           <CommitmentTable
             commitments={visible}
             directory={directory}
+            projects={projects}
             currentUserId={user.uid}
             currentUserEmail={user.email}
             busyId={busyId}
@@ -181,6 +201,7 @@ export function Ledger() {
         <NewCommitmentDialog
           ownerId={user.uid}
           ownerEmail={user.email}
+          projects={activeProjects}
           onClose={() => setDialog(null)}
         />
       ) : null}

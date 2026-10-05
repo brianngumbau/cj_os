@@ -5,6 +5,7 @@ import { LoaderCircle, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 
 import { createCommitment } from "@/lib/commitments";
+import type { Project } from "@/lib/types";
 import {
   errorClass,
   hintClass,
@@ -25,17 +26,21 @@ function defaultDeadline(): string {
 type NewCommitmentDialogProps = {
   ownerId: string;
   ownerEmail: string | null;
+  /** Projects the commitment may be linked to. Linking is optional. */
+  projects: Project[];
   onClose: () => void;
 };
 
 export function NewCommitmentDialog({
   ownerId,
   ownerEmail,
+  projects,
   onClose,
 }: NewCommitmentDialogProps) {
   const [objective, setObjective] = useState("");
   const [deliverableExpected, setDeliverableExpected] = useState("");
   const [deadline, setDeadline] = useState(defaultDeadline);
+  const [projectId, setProjectId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +68,7 @@ export function NewCommitmentDialog({
         objective,
         deliverableExpected,
         deadline: deadlineDate,
+        projectId: projectId || null,
       });
       onClose();
     } catch (caught) {
@@ -130,6 +136,28 @@ export function NewCommitmentDialog({
             onChange={(event) => setDeadline(event.target.value)}
             className={inputClass}
           />
+        </div>
+
+        <div>
+          <label htmlFor="project" className={labelClass}>
+            Project <span className="normal-case tracking-normal">(optional)</span>
+          </label>
+          <select
+            id="project"
+            value={projectId}
+            onChange={(event) => setProjectId(event.target.value)}
+            className={inputClass}
+          >
+            <option value="">No project — standalone commitment</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name || "Untitled project"} · {project.stage}
+              </option>
+            ))}
+          </select>
+          <p className={hintClass}>
+            Linked commitments count as tasks toward the project&apos;s progress.
+          </p>
         </div>
 
         {error ? (
