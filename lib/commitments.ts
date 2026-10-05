@@ -46,6 +46,7 @@ function toCommitment(snapshot: QueryDocumentSnapshot<DocumentData>): Commitment
   return {
     id: snapshot.id,
     ownerId: readString(data.ownerId),
+    ownerEmail: readNullableString(data.ownerEmail),
     objective: readString(data.objective),
     deliverableExpected: readString(data.deliverableExpected),
     status: isCommitmentStatus(data.status) ? data.status : "pending",
@@ -74,12 +75,16 @@ export function subscribeToCommitments(
   return onSnapshot(
     ledger,
     (snapshot) => onChange(snapshot.docs.map(toCommitment)),
-    onError,
+    (error) => {
+      console.error("Firestore fetch error:", error);
+      onError(error);
+    },
   );
 }
 
 export type NewCommitmentInput = {
   ownerId: string;
+  ownerEmail: string | null;
   objective: string;
   deliverableExpected: string;
   deadline: Date;
@@ -89,6 +94,7 @@ export type NewCommitmentInput = {
 export async function createCommitment(input: NewCommitmentInput): Promise<void> {
   await addDoc(collection(db, COMMITMENTS_COLLECTION), {
     ownerId: input.ownerId,
+    ownerEmail: input.ownerEmail,
     objective: input.objective.trim(),
     deliverableExpected: input.deliverableExpected.trim(),
     status: "pending",

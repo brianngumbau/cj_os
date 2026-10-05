@@ -48,11 +48,13 @@ export function EvidenceDialog({ commitment, onClose }: EvidenceDialogProps) {
       await completeCommitment(commitment.id, link);
       onClose();
     } catch (caught) {
+      console.error("Firestore write error (complete commitment):", caught);
       setError(
         caught instanceof Error
           ? `Could not save: ${caught.message}`
           : "Could not close out the commitment.",
       );
+    } finally {
       setSubmitting(false);
     }
   }

@@ -44,11 +44,13 @@ export function BlockerDialog({ commitment, onClose }: BlockerDialogProps) {
       await blockCommitment(commitment.id, reason);
       onClose();
     } catch (caught) {
+      console.error("Firestore write error (block commitment):", caught);
       setError(
         caught instanceof Error
           ? `Could not save: ${caught.message}`
           : "Could not flag the blocker.",
       );
+    } finally {
       setSubmitting(false);
     }
   }

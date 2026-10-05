@@ -93,6 +93,7 @@ export function Ledger() {
     try {
       await reopenCommitment(commitment.id);
     } catch (caught) {
+      console.error("Firestore write error (reopen commitment):", caught);
       setActionError(
         caught instanceof Error
           ? `Could not reopen: ${caught.message}`
@@ -179,6 +180,7 @@ export function Ledger() {
       {dialog?.kind === "new" ? (
         <NewCommitmentDialog
           ownerId={user.uid}
+          ownerEmail={user.email}
           onClose={() => setDialog(null)}
         />
       ) : null}

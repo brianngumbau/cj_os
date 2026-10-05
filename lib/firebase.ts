@@ -44,6 +44,22 @@ if (missingConfig.length > 0) {
   );
 }
 
+// A value pasted from the console's JS snippet keeps its trailing comma or
+// quotes. Auth tolerates that, but Firestore then targets a project that does
+// not exist: writes sit in the local cache, never acknowledged, and vanish on
+// refresh. Fail here instead.
+const malformedConfig = requiredConfig
+  .filter(([key]) => /[",'\s]/.test(String(firebaseConfig[key])))
+  .map(([, envName]) => envName);
+
+if (malformedConfig.length > 0) {
+  throw new Error(
+    `Firebase config is malformed. ${malformedConfig.join(", ")} in .env.local ` +
+      'contains a stray comma, quote or space — use NAME="value" with nothing after the closing quote, ' +
+      "then restart `next dev`.",
+  );
+}
+
 // `next dev` re-evaluates this module on hot reload, so reuse the existing
 // app instead of letting Firebase throw on duplicate initialization.
 export const firebaseApp: FirebaseApp = getApps().length

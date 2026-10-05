@@ -27,6 +27,7 @@ export type UserProfile = {
 export type Commitment = {
   id: string;
   ownerId: string;
+  ownerEmail: string | null;
   objective: string;
   deliverableExpected: string;
   status: CommitmentStatus;

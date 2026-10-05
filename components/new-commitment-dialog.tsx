@@ -24,11 +24,13 @@ function defaultDeadline(): string {
 
 type NewCommitmentDialogProps = {
   ownerId: string;
+  ownerEmail: string | null;
   onClose: () => void;
 };
 
 export function NewCommitmentDialog({
   ownerId,
+  ownerEmail,
   onClose,
 }: NewCommitmentDialogProps) {
   const [objective, setObjective] = useState("");
@@ -57,17 +59,20 @@ export function NewCommitmentDialog({
     try {
       await createCommitment({
         ownerId,
+        ownerEmail,
         objective,
         deliverableExpected,
         deadline: deadlineDate,
       });
       onClose();
     } catch (caught) {
+      console.error("Firestore write error (create commitment):", caught);
       setError(
         caught instanceof Error
           ? `Could not save: ${caught.message}`
           : "Could not save the commitment.",
       );
+    } finally {
       setSubmitting(false);
     }
   }
